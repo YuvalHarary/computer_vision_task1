@@ -67,6 +67,9 @@ def sgd_momentum(w, dw, config=None):
     # TODO: Implement the momentum update formula. Store the updated value in #
     # the next_w variable. You should also use and update the velocity v.     #
     ###########################################################################
+    # the velocity keeps a decaying sum of past steps; the weights move along it
+    v = config["momentum"] * v - config["learning_rate"] * dw
+    next_w = w + v
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -101,6 +104,9 @@ def rmsprop(w, dw, config=None):
     # in the next_w variable. Don't forget to update cache value stored in    #
     # config['cache'].                                                        #
     ###########################################################################
+    decay = config["decay_rate"]
+    config["cache"] = decay * config["cache"] + (1 - decay) * dw * dw
+    next_w = w - config["learning_rate"] * dw / (np.sqrt(config["cache"]) + config["epsilon"])
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -142,6 +148,15 @@ def adam(w, dw, config=None):
     # NOTE: In order to match the reference output, please modify t _before_  #
     # using it in any calculations.                                           #
     ###########################################################################
+    beta1, beta2 = config["beta1"], config["beta2"]
+    config["t"] += 1
+    t = config["t"]
+    config["m"] = beta1 * config["m"] + (1 - beta1) * dw
+    config["v"] = beta2 * config["v"] + (1 - beta2) * dw * dw
+    # bias correction: m and v start at 0, so early averages are too small
+    m_hat = config["m"] / (1 - beta1 ** t)
+    v_hat = config["v"] / (1 - beta2 ** t)
+    next_w = w - config["learning_rate"] * m_hat / (np.sqrt(v_hat) + config["epsilon"])
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
