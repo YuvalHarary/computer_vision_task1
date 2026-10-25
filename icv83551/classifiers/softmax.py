@@ -40,6 +40,11 @@ def softmax_loss_naive(W, X, y, reg):
 
         loss -= logp[y[i]]  # negative log probability is the loss
 
+        # d(-log p[y[i]]) / d(score j) = p[j] - 1{j == y[i]}, and
+        # d(score j) / d(W[:, j]) = X[i]
+        for j in range(num_classes):
+            dscore = p[j] - (j == y[i])
+            dW[:, j] += dscore * X[i]
 
     # normalized hinge loss plus regularization
     loss = loss / num_train + reg * np.sum(W * W)
@@ -52,7 +57,8 @@ def softmax_loss_naive(W, X, y, reg):
     # loss is being computed. As a result you may need to modify some of the    #
     # code above to compute the gradient.                                       #
     #############################################################################
-
+    # average the data gradient like the loss, and add the gradient of reg * sum(W^2)
+    dW = dW / num_train + 2 * reg * W
 
     return loss, dW
 
@@ -73,7 +79,13 @@ def softmax_loss_vectorized(W, X, y, reg):
     # Implement a vectorized version of the softmax loss, storing the           #
     # result in loss.                                                           #
     #############################################################################
-
+    num_train = X.shape[0]
+    scores = X.dot(W)                                        # (N, C)
+    # shift each row by its max so exp() cannot overflow
+    scores -= np.max(scores, axis=1, keepdims=True)
+    log_probs = scores - np.log(np.sum(np.exp(scores), axis=1, keepdims=True))
+    rows = np.arange(num_train)
+    loss = -np.sum(log_probs[rows, y]) / num_train + reg * np.sum(W * W)
 
     #############################################################################
     # TODO:                                                                     #
@@ -84,6 +96,9 @@ def softmax_loss_vectorized(W, X, y, reg):
     # to reuse some of the intermediate values that you used to compute the     #
     # loss.                                                                     #
     #############################################################################
-
+    # gradient w.r.t. the scores is probs minus the one-hot labels
+    dscores = np.exp(log_probs)
+    dscores[rows, y] -= 1
+    dW = X.T.dot(dscores) / num_train + 2 * reg * W
 
     return loss, dW
