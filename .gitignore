@@ -4,3 +4,6 @@ icv83551/datasets/*.tar.gz
 icv83551/datasets/*.npz
 __pycache__/
 .ipynb_checkpoints/
+
+# Claude Code project settings / skills (not part of the submission)
+.claude/
