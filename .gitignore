@@ -1,0 +1,6 @@
+# CIFAR-10 / ImageNet data downloaded by get_datasets.sh (too large for GitHub)
+icv83551/datasets/cifar-10-batches-py/
+icv83551/datasets/*.tar.gz
+icv83551/datasets/*.npz
+__pycache__/
+.ipynb_checkpoints/
